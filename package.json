@@ -1,0 +1,25 @@
+{
+	"scripts": {
+		"api": "pnpm -F @packages/api",
+		"back": "pnpm -F @packages/back",
+		"front": "pnpm -F @packages/front",
+		"mobile": "pnpm -F @packages/mobile",
+		"build": "pnpm -r build && pnpm bundle",
+		"build:api": "pnpm -F @packages/api build && pnpm bundle:api",
+		"build:back": "pnpm -F @packages/back build && pnpm bundle:back",
+		"build:front": "pnpm -F @packages/front build && pnpm bundle:front",
+		"build:mobile": "pnpm -F @packages/front build && pnpm bundle:mobile",
+		"bundle": "node scripts/bundle.mjs",
+		"bundle:api": "node scripts/bundle-api.mjs",
+		"bundle:back": "node scripts/bundle-back.mjs",
+		"bundle:front": "node scripts/bundle-front.mjs",
+		"bundle:mobile": "node scripts/bundle-mobile.mjs"
+	},
+	"devDependencies": {
+		"@types/archiver": "^6.0.3",
+		"archiver": "^7.0.1",
+		"dayjs": "^1.11.13",
+		"nanoid": "^5.1.5",
+		"prettier": "3.5.3"
+	}
+}
