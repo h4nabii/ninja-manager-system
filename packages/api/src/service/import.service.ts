@@ -27,7 +27,7 @@ export class ImportService {
     const info = await this.downloadFromUrl(url);
     const { type, filePath } = info;
     if (type === 'member') {
-      await this.parseMemberExcel(filePath);
+      await this.dealMemberImport(filePath);
     } else if (type === 'battle-report') {
       await this.parseBattleReportExcel(filePath);
     } else {
@@ -35,22 +35,25 @@ export class ImportService {
     }
   }
 
+  async dealMemberImport(filePath: string) {
+    const data = await this.parseMemberExcel(filePath);
+    const rawEntities = data.map(i => ({ ...i, inFamily: true }));
+    await this.ds.manager.update(NinjaEntity, { id: Not(IsNull()) }, { inFamily: false });
+    await this.ds.manager.upsert(NinjaEntity, rawEntities, ['uid']);
+  }
+
   async parseMemberExcel(filePath: string) {
     const wb = new exceljs.Workbook();
     await wb.xlsx.readFile(filePath);
     const ws = wb.getWorksheet(1);
-    const rows = ws.getRows(1, ws.rowCount);
-
-    const data = rows.map(i => {
+    // 排除标题行
+    const rows = ws.getRows(2, ws.rowCount - 1);
+    return rows.map(i => {
       const uid = String(i.getCell(1).value);
       const name = String(i.getCell(2).value);
       const joinTime = dayjs(String(i.getCell(3).value)).toDate();
-      return { uid, name, joinTime, inFamily: true };
+      return { uid, name, joinTime };
     });
-    data.shift(); // 移除标题
-
-    await this.ds.manager.update(NinjaEntity, { id: Not(IsNull()) }, { inFamily: false });
-    await this.ds.manager.upsert(NinjaEntity, data, ['uid']);
   }
 
   async parseBattleReportExcel(filePath: string) {
@@ -131,6 +134,7 @@ export class ImportService {
         const [map, effectsStr] = String(line.getCell('F').value).split(' ');
         const effects = effectsStr.split('+');
         const ninjaInfo: { uid: string; score: number }[] = [];
+        let mvp = '';
         if (line.getCell('G').isMerged) {
           // 如果是单人战斗
           const uid = String(line.getCell('G').value).split(/[（）]/)[1];
@@ -145,8 +149,12 @@ export class ImportService {
             const score = Number(line.getCell(scoreCode).value);
             ninjaInfo.push({ uid, score });
           }
+          const copy = [...ninjaInfo];
+          copy.sort((a, b) => a.score - b.score);
+          [{ uid: mvp }] = copy;
         }
-        return { battleId: battle.id, type, order, score, result, map, difficulty, effects, ninjaInfo, mvp: '' };
+        // FIXME：这个计算方式不准确，同分可能存在问题！
+        return { battleId: battle.id, type, order, score, result, map, difficulty, effects, ninjaInfo, mvp };
       });
     });
     console.log(fightInfos);
