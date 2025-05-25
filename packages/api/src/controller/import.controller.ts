@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, makeHttpRequest, Post } from '@midwayjs/core';
+import { Body, Controller, Inject, Post } from '@midwayjs/core';
 import { InjectDataSource } from '@midwayjs/typeorm';
 import { DataSource } from 'typeorm';
 import { HttpResp } from '../utils/response';

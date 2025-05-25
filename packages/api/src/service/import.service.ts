@@ -1,7 +1,7 @@
 import { Inject, makeHttpRequest, Provide } from '@midwayjs/core';
 import { UploadService } from './upload.service';
 import { InjectDataSource } from '@midwayjs/typeorm';
-import { Column, DataSource, In, IsNull, Not } from 'typeorm';
+import { DataSource, IsNull, Not } from 'typeorm';
 import { NinjaEntity } from '../entity/ninja.entity';
 import * as path from 'node:path';
 import * as fs from 'node:fs';

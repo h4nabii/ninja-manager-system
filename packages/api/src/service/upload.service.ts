@@ -56,7 +56,6 @@ export class UploadService {
    * @param tempPath 临时文件路径
    */
   async saveFile(tempPath: string) {
-    // TODO：增加 rubbish 功能，用于上传临时文件（或许可以支持返回一个 tempKey 允许前端调用删除）
     try {
       // 读取文件
       const data = await fs.readFile(tempPath);
