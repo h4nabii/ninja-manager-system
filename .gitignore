@@ -10,7 +10,7 @@ lerna-debug.log*
 # 编辑器配置文件
 .vscode/*
 !.vscode/extensions.json
-.idea
+# .idea
 .project
 *.suo
 *.ntvs*
