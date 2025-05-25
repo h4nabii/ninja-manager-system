@@ -33,6 +33,7 @@ export class ImportService {
     } else {
       throw new Error('不支持的类型，请检查 URL 或联系管理');
     }
+    return info.type;
   }
 
   async dealMemberImport(filePath: string) {

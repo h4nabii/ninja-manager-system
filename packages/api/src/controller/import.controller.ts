@@ -15,8 +15,8 @@ export class ImportController {
   @Post('/byUrl')
   async importByUrl(@Body('url') url: string) {
     try {
-      await this.imp.importByUrl(url);
-      return HttpResp.success();
+      const type = await this.imp.importByUrl(url);
+      return HttpResp.success({ type });
     } catch (err) {
       if (err instanceof Error) {
         console.error(err.stack);
