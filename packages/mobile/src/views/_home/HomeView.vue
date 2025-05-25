@@ -1,7 +1,7 @@
 <template>
   <div class="size-full home-view">
     <header class="h-[--header-height] bg-#66ccff flex justify-center items-center">
-      <div class="text-18px">月下琉璃花未眠</div>
+      <div class="text-24px fw-bold">「云上琉璃」</div>
     </header>
     <section class="h-[--main-height] p-10px">
       <div>

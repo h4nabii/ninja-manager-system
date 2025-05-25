@@ -11,6 +11,7 @@ export default defineConfig({
   plugins: [vue(), vueJsx(), vueDevTools(), UnoCSS()],
   server: {
     host: '0.0.0.0',
+    port: 5679,
     proxy: {
       '/ninja_api': {
         target: 'http://localhost:11894',

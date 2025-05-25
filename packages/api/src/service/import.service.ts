@@ -7,7 +7,7 @@ import * as path from 'node:path';
 import * as fs from 'node:fs';
 import * as exceljs from 'exceljs';
 import * as dayjs from 'dayjs';
-import { NinjaMemberService } from './ninja-member.service';
+import { MemberService } from './member.service';
 import { FamilyBattleEntity } from '../entity/family-battle.entity';
 import { FamilyRaidEntity } from '../entity/family-raid.entity';
 import { FamilyFightEntity } from '../entity/family-fight.entity';
@@ -21,7 +21,7 @@ export class ImportService {
   uploadService: UploadService;
 
   @Inject()
-  ninjaMemberService: NinjaMemberService;
+  ninjaMemberService: MemberService;
 
   async importByUrl(url: string) {
     const info = await this.downloadFromUrl(url);
