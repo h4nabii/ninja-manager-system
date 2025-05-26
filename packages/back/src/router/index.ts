@@ -19,6 +19,11 @@ const router = createRouter({
           name: 'battle',
           component: () => import('../views/battle/battle-view.vue'),
         },
+        {
+          path: '/info',
+          name: 'info',
+          component: () => import('../views/info/info-view.vue'),
+        },
       ],
     },
   ],

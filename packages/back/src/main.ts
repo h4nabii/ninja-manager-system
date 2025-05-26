@@ -1,4 +1,4 @@
-import './assets/style/main.css'
+import './assets/style/main.scss'
 import 'virtual:uno.css'
 
 import { createApp } from 'vue'

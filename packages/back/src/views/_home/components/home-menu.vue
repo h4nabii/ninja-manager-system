@@ -21,6 +21,7 @@ const route = useRoute()
 const menuList = [
   { name: 'member', text: '成员管理' },
   { name: 'battle', text: '族战管理' },
+  { name: 'info', text: '家族概况' },
 ]
 const curName = computed(() => route.name)
 

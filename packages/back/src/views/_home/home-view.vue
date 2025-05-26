@@ -7,7 +7,7 @@
       <aside class="h-full w-[--menu-width]">
         <home-menu />
       </aside>
-      <div class="w-[--main-width] views">
+      <div class="w-[--main-width] views p-10px box-border">
         <router-view />
       </div>
     </section>
@@ -29,7 +29,8 @@ import HomeMenu from '@/views/_home/components/home-menu.vue'
   --main-width: calc(100% - var(--menu-width));
 
   .views {
-    box-shadow: inset 3px 3px 10px -5px gray;
+    box-shadow: inset 2px 2px 5px -1px #ccc;
+    background: rgb(240, 242, 245);
   }
 }
 </style>

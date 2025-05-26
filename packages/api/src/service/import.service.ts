@@ -1,7 +1,7 @@
 import { Inject, makeHttpRequest, Provide } from '@midwayjs/core';
 import { UploadService } from './upload.service';
 import { InjectDataSource } from '@midwayjs/typeorm';
-import { DataSource, IsNull, Not } from 'typeorm';
+import { DataSource, In, IsNull, Not } from 'typeorm';
 import { NinjaEntity } from '../entity/ninja.entity';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
@@ -196,5 +196,17 @@ export class ImportService {
     const [type, difficulty, scoreStr] = title.split(/[（）]/);
     const score = Number(scoreStr.split('：')[1]);
     return { type, difficulty, score };
+  }
+
+  async checkBattleImportStates(dates: Date[]) {
+    const battles = await this.ds.manager.find(FamilyBattleEntity, { where: { date: In(dates) } });
+    console.log(battles);
+    return dates.map(d => {
+      if (battles.find(i => i.date.getTime() === d.getTime())) {
+        return { date: d, state: 'imported' };
+      } else {
+        return { date: d, state: 'no-data' };
+      }
+    });
   }
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="size-full p-10px flex flex-col gap-10px">
+  <div class="size-full flex flex-col bg-white rounded-4px p-10px gap-10px">
     <!-- options-bar -->
     <div>
       <el-button type="primary" disabled>导入数据</el-button>
@@ -15,11 +15,12 @@
       </el-table-column>
       <el-table-column label="操作" align="center" width="120">
         <template #default="{ row }">
-          <el-button type="primary">详情{{ row.id }}</el-button>
+          <el-button type="primary" @click="openMemberInfoDialog(row.uid)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
     <custom-pagination v-model:page="page" v-model:size="size" :total />
+    <dialog-member-info ref="dialogMemberInfoRef" />
   </div>
 </template>
 
@@ -28,6 +29,7 @@ import CustomPagination from '@/components/custom-pagination.vue'
 import { onMounted, reactive, ref, watch } from 'vue'
 import dayjs from 'dayjs'
 import axios from 'axios'
+import DialogMemberInfo from '@/views/member/components/dialog-member-info.vue'
 
 const data = ref<any[]>([])
 const page = ref(1)
@@ -43,6 +45,11 @@ async function loadData() {
 
 onMounted(loadData)
 watch([page, size], loadData)
+
+const dialogMemberInfoRef = ref<InstanceType<typeof DialogMemberInfo>>()
+function openMemberInfoDialog(uid: string) {
+  dialogMemberInfoRef.value?.open({ uid })
+}
 </script>
 
 <style scoped></style>
