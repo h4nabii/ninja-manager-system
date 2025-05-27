@@ -7,6 +7,7 @@
           <el-option v-for="{ label, value } of mouthList" :key="value" :label :value />
         </el-select>
       </div>
+      <el-button type="primary" @click="loadWeeks">更新数据</el-button>
     </div>
     <div class="h-[--main-height] flex-1 flex gap-[--gap]">
       <div class="shadow-border h-full w-[--menu-width] flex flex-col gap-20px p-10px">
@@ -200,8 +201,11 @@ function importData() {
 const qrCodeCanvas = ref<HTMLCanvasElement>()
 watch(qrCodeCanvas, async () => {
   if (qrCodeCanvas.value) {
+    const url = import.meta.env.DEV
+      ? 'http://192.168.10.4:5679/'
+      : 'http://1.94.149.145/ninja/mobile'
     try {
-      await qrCode.toCanvas(qrCodeCanvas.value, 'http://1.94.149.145/ninja/mobile', { width: 200 })
+      await qrCode.toCanvas(qrCodeCanvas.value, url, { width: 200 })
     } catch (err) {
       console.error('QR Code generation failed:', err)
     }
