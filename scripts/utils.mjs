@@ -3,6 +3,7 @@ import fsSync from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import archiver from "archiver";
+import dayjs from "dayjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const curTime = () => dayjs().format("YYYY-MM-DD HH:mm:ss");
