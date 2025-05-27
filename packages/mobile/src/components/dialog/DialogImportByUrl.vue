@@ -79,6 +79,7 @@ function open() {
 }
 
 function close() {
+  url.value = ''
   visible.value = false
 }
 

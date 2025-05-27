@@ -32,7 +32,7 @@
           </div>
         </div>
       </div>
-      <div class="shadow-border w-[--main-width] p-10px flex flex-col gap-10px">
+      <div class="shadow-border w-[--main-width] p-10px flex flex-col gap-10px overflow-hidden">
         <template v-if="status === 'imported'">
           <div class="flex gap-10px items-center">
             <el-radio-group v-model="fightType">
@@ -66,10 +66,20 @@
             <el-empty class="size-full" description="内容开发中" />
           </div>
         </template>
-        <div v-else class="size-full flex flex-col items-center justify-center">
-          <el-empty>
-            <el-button type="primary" @click="importData">导入数据</el-button>
-          </el-empty>
+        <div v-else class="size-full flex flex-col items-center justify-center gap-20px">
+          <div class="text-28px fw-bold">数据导入</div>
+          <div class="flex gap-30px w-full h-80% justify-center">
+            <div class="empty-border-block flex flex-col">
+              <div class="fw-bold">方法一：扫描二维码，打开移动端网页使用分享链接导入</div>
+              <canvas class="qr-code-canvas" ref="qrCodeCanvas"></canvas>
+            </div>
+            <div class="empty-border-block flex flex-col">
+              <div class="fw-bold">方法二：在后台直接导入（开发中）</div>
+              <div class="h-80px flex items-center justify-center">
+                <el-button type="primary" @click="importData">导入数据</el-button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -77,12 +87,13 @@
 </template>
 
 <script setup lang="ts">
+import CustomPagination from '@/components/custom-pagination.vue'
 import dayjs from 'dayjs'
 import { computed, onMounted, ref, watch } from 'vue'
+import { ElMessage } from 'element-plus'
 import { getLastManyWeekends, getWeekendsOfMonth, monthOrderNumOfDay } from '@/utils/week.ts'
 import { instance } from '@/utils/request'
-import CustomPagination from '@/components/custom-pagination.vue'
-import { ElMessage } from 'element-plus'
+import qrCode from 'qrcode'
 
 const mouthList = getMouthList()
 const curMouth = ref<string>('last')
@@ -185,6 +196,17 @@ watch([battleTime, fightType, page, size], async () => {
 function importData() {
   ElMessage.warning('内容开发中')
 }
+
+const qrCodeCanvas = ref<HTMLCanvasElement>()
+watch(qrCodeCanvas, async () => {
+  if (qrCodeCanvas.value) {
+    try {
+      await qrCode.toCanvas(qrCodeCanvas.value, 'http://1.94.149.145/ninja/mobile', { width: 200 })
+    } catch (err) {
+      console.error('QR Code generation failed:', err)
+    }
+  }
+})
 </script>
 
 <style scoped lang="scss">
@@ -241,6 +263,25 @@ function importData() {
     border: 1px solid #cecece;
     border-radius: 8px;
     box-shadow: 3px 3px 5px -2px #cecece;
+  }
+
+  .empty-border-block {
+    width: 45%;
+    height: 90%;
+    min-width: 500px;
+    min-height: 500px;
+    border: 1px solid #cecece;
+    border-radius: 8px;
+    box-shadow: 3px 3px 5px -2px #cecece;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+
+    .qr-code-canvas {
+      width: 200px;
+      height: 200px;
+    }
   }
 }
 </style>
