@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="8937b03a-8800-4845-95e3-469ff554cb1f" name="hw-server">
+        <fileTransfer rootFolder="/usr/share/nginx" accessType="SFTP" host="1.94.149.145" port="22" sshConfigId="ccee7b7b-38ae-4eb1-bcd8-d8dac6af7569" sshConfig="hw-server" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="bc454193-7cf7-4d5e-b356-ebc4c8a4720a" name="nginx">
+        <fileTransfer rootFolder="/etc/nginx" accessType="SFTP" host="1.94.149.145" port="22" sshConfigId="ccee7b7b-38ae-4eb1-bcd8-d8dac6af7569" sshConfig="hw-server" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

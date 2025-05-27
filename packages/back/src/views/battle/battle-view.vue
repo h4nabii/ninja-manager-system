@@ -126,7 +126,7 @@ async function loadWeeks() {
       return { text, day1, day2 }
     }),
   )
-  battleTime.value = weeks.value[0]?.day1.date
+  if (weeks.value[0]?.day1) selectBattle(weeks.value[0]?.day1)
 }
 
 const battleInfo = ref<any>()
@@ -164,16 +164,21 @@ const total = ref(0)
 const data = ref<any[]>([])
 watch([battleTime, fightType, page, size], async () => {
   if (battleTime.value && fightType.value && status.value === 'imported') {
-    const resp = await instance.post('/battle/getFightInfo', {
-      type: fightType.value,
-      time: battleTime.value,
-      page: page.value,
-      size: size.value,
-    })
-    console.log(resp)
-    const info = resp.data.data
-    data.value = info.list
-    total.value = info.pagination.total
+    try {
+      const resp = await instance.post('/battle/getFightInfo', {
+        type: fightType.value,
+        time: battleTime.value,
+        page: page.value,
+        size: size.value,
+      })
+      console.log(resp)
+      const info = resp.data.data
+      data.value = info.list
+      total.value = info.pagination.total
+    } catch (error) {}
+  } else {
+    data.value = []
+    total.value = 0
   }
 })
 

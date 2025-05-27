@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="hw-server" remoteFilesAllowedToDisappearOnAutoupload="false">
+    <serverData>
+      <paths name="hw-server">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/api/ninja_manager_system_api" local="$PROJECT_DIR$/packages/api" web="/" />
+            <mapping deploy="/html/ninja/management" local="$PROJECT_DIR$/packages/back/dist" web="/" />
+            <mapping deploy="/html/ninja/mobile" local="$PROJECT_DIR$/packages/mobile/dist" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="nginx">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

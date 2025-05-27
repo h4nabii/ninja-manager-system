@@ -9,6 +9,7 @@ import UnoCSS from 'unocss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue(), vueJsx(), vueDevTools(), UnoCSS()],
+  base: './',
   server: {
     host: '0.0.0.0',
     port: 5679,
