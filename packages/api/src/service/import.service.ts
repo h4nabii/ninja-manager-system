@@ -154,17 +154,19 @@ export class ImportService {
             const scoreCode = String.fromCharCode('H'.charCodeAt(0) + i * 2);
             const uid = String(line.getCell(uidCode).value).split(/[（）]/)[1];
             const score = Number(line.getCell(scoreCode).value);
-            ninjaInfo.push({ uid, score });
+            if (uid) ninjaInfo.push({ uid, score });
           }
           const copy = [...ninjaInfo];
-          copy.sort((a, b) => a.score - b.score);
-          [{ uid: mvp }] = copy;
+          copy.sort((a, b) => b.score - a.score);
+          [{ uid: mvp = '' }] = copy;
+          // console.log(copy, '////////');
         }
         // FIXME：这个计算方式不准确，同分可能存在问题！
         return { battleId: battle.id, type, order, score, result, map, difficulty, effects, ninjaInfo, mvp };
       });
     });
-    console.log(fightInfos);
+    // console.log(fightInfos);
+    // console.log('?//////////////////////////');
     await this.ds.manager.upsert(FamilyFightEntity, fightInfos, ['battleId', 'type', 'order']);
   }
 

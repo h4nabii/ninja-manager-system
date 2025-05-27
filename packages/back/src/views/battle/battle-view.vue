@@ -38,28 +38,37 @@
             <el-radio-group v-model="fightType">
               <el-radio-button v-for="{ label, value } in fightTypeOptions" :label :value />
             </el-radio-group>
+            <div class="enemy-info flex items-center">
+              <div>敌对家族：</div>
+              <div>{{ battleInfo?.enemyName }}</div>
+            </div>
             <div>{{ battleTime }}</div>
             <div>{{ fightType }}</div>
           </div>
-          <el-table class="flex-1" :data border>
-            <el-table-column label="排名" prop="rank" align="center" width="55" />
-            <el-table-column label="昵称">
-              <template #default="{ row }">
-                <div v-if="row.name">{{ row.name }}</div>
-                <div v-else class="italic text-#999">无数据</div>
-              </template>
-            </el-table-column>
-            <el-table-column label="UID" prop="uid" />
-            <el-table-column label="常用QQ" prop="qq" />
-            <el-table-column label="分数" prop="score" />
-            <el-table-column label="历史平均" prop="scoreAvg" />
-            <el-table-column label="标准参考" prop="standardDiff" />
-          </el-table>
-          <custom-pagination v-model:page="page" v-model:size="size" :total />
+          <template v-if="fightType.startsWith('raid')">
+            <el-table class="flex-1" :data border>
+              <el-table-column label="排名" prop="rank" align="center" width="55" />
+              <el-table-column label="昵称">
+                <template #default="{ row }">
+                  <div v-if="row.name">{{ row.name }}</div>
+                  <div v-else class="italic text-#999">无数据</div>
+                </template>
+              </el-table-column>
+              <el-table-column label="UID" prop="uid" />
+              <el-table-column label="常用QQ" prop="qq" />
+              <el-table-column label="分数" prop="score" />
+              <el-table-column label="历史平均" prop="scoreAvg" />
+              <el-table-column label="标准参考" prop="standardDiff" />
+            </el-table>
+            <custom-pagination v-model:page="page" v-model:size="size" :total />
+          </template>
+          <div v-else class="flex-1">
+            <el-empty class="size-full" description="内容开发中" />
+          </div>
         </template>
         <div v-else class="size-full flex flex-col items-center justify-center">
           <el-empty>
-            <el-button type="primary">导入数据</el-button>
+            <el-button type="primary" @click="importData">导入数据</el-button>
           </el-empty>
         </div>
       </div>
@@ -73,6 +82,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { getLastManyWeekends, getWeekendsOfMonth, monthOrderNumOfDay } from '@/utils/week.ts'
 import { instance } from '@/utils/request'
 import CustomPagination from '@/components/custom-pagination.vue'
+import { ElMessage } from 'element-plus'
 
 const mouthList = getMouthList()
 const curMouth = ref<string>('last')
@@ -166,6 +176,10 @@ watch([battleTime, fightType, page, size], async () => {
     total.value = info.pagination.total
   }
 })
+
+function importData() {
+  ElMessage.warning('内容开发中')
+}
 </script>
 
 <style scoped lang="scss">
@@ -208,6 +222,14 @@ watch([battleTime, fightType, page, size], async () => {
     .no-data {
       color: var(--el-color-danger);
     }
+  }
+
+  .enemy-info {
+    height: 32px;
+    border: 1px solid #cecece;
+    border-radius: 4px;
+    padding: 1px 10px;
+    box-shadow: 1px 1px 3px -1px #cecece;
   }
 
   .shadow-border {
