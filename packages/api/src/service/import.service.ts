@@ -11,6 +11,7 @@ import { MemberService } from './member.service';
 import { FamilyBattleEntity } from '../entity/family-battle.entity';
 import { FamilyRaidEntity } from '../entity/family-raid.entity';
 import { FamilyFightEntity } from '../entity/family-fight.entity';
+import { type } from 'node:os';
 
 @Provide()
 export class ImportService {
@@ -47,8 +48,10 @@ export class ImportService {
     const wb = new exceljs.Workbook();
     await wb.xlsx.readFile(filePath);
     const ws = wb.getWorksheet(1);
+    if (!ws) throw new Error('未找到工作表，请检查文件格式');
     // 排除标题行
     const rows = ws.getRows(2, ws.rowCount - 1);
+    if (!rows) throw new Error('未找到数据行，请检查文件格式');
     return rows.map(i => {
       const uid = String(i.getCell(1).value);
       const name = String(i.getCell(2).value);
@@ -61,7 +64,9 @@ export class ImportService {
     const wb = new exceljs.Workbook();
     await wb.xlsx.readFile(filePath);
     const ws = wb.getWorksheet(1);
+    if (!ws) throw new Error('未找到工作表，请检查文件格式');
     const rows = ws.getRows(1, ws.rowCount);
+    if (!rows) throw new Error('未找到数据行，请检查文件格式');
 
     // 创建或更新族战对象
     const title = ws.getCell('A1');
@@ -75,6 +80,7 @@ export class ImportService {
     const battleUpdateData = { ...battleInfo, raidType1: raidInfo1.type, raidType2: raidInfo2.type };
     await this.ds.manager.upsert(FamilyBattleEntity, battleUpdateData, ['date']);
     const battle = await this.ds.manager.findOneBy(FamilyBattleEntity, { date: battleInfo.date });
+    if (!battle) throw new Error('未找到对应的族战记录');
 
     // 团本信息
     type RaidItem = { uid: string; type: string; score: number; battleType: string; battleId: number };
@@ -203,9 +209,9 @@ export class ImportService {
     console.log(battles);
     return dates.map(d => {
       if (battles.find(i => i.date.getTime() === d.getTime())) {
-        return { date: d, state: 'imported' };
+        return { date: d, state: 'imported', text: '已导入' };
       } else {
-        return { date: d, state: 'no-data' };
+        return { date: d, state: 'no-data', text: '无数据' };
       }
     });
   }

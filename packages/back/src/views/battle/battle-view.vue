@@ -1,6 +1,6 @@
 <template>
   <div class="battle-view size-full flex flex-col bg-white rounded-4px p-10px gap-10px">
-    <div class="flex items-center gap-10px box-border">
+    <div class="h-[--header-height] flex items-center gap-10px box-border">
       <div class="flex items-center">
         <div>数据范围：</div>
         <el-select v-model="curMouth" class="!w-200px">
@@ -8,18 +8,59 @@
         </el-select>
       </div>
     </div>
-    <div>
-      <div v-for="week of weeks">
-        <div>{{ week.text }}</div>
-        <div class="flex">
-          <div class="battle-card">
-            <div>{{ week.day1.date }}</div>
-            <div>{{ week.day1.state }}</div>
+    <div class="h-[--main-height] flex-1 flex gap-[--gap]">
+      <div class="shadow-border h-full w-[--menu-width] flex flex-col gap-20px p-10px">
+        <div v-for="week of weeks" class="flex flex-col gap-10px">
+          <div>{{ week.text }}</div>
+          <div class="flex flex-col gap-10px">
+            <div
+              class="battle-card"
+              :class="{ active: battleTime === week.day1.date }"
+              @click="selectBattle(week.day1)"
+            >
+              <div>{{ week.day1.date }}</div>
+              <div :class="{ [week.day1.state]: true }">{{ week.day1.text }}</div>
+            </div>
+            <div
+              class="battle-card"
+              :class="{ active: battleTime === week.day2.date }"
+              @click="selectBattle(week.day2)"
+            >
+              <div>{{ week.day2.date }}</div>
+              <div :class="{ [week.day2.state]: true }">{{ week.day2.text }}</div>
+            </div>
           </div>
-          <div class="battle-card">
-            <div>{{ week.day2.date }}</div>
-            <div>{{ week.day2.state }}</div>
+        </div>
+      </div>
+      <div class="shadow-border w-[--main-width] p-10px flex flex-col gap-10px">
+        <template v-if="status === 'imported'">
+          <div class="flex gap-10px items-center">
+            <el-radio-group v-model="fightType">
+              <el-radio-button v-for="{ label, value } in fightTypeOptions" :label :value />
+            </el-radio-group>
+            <div>{{ battleTime }}</div>
+            <div>{{ fightType }}</div>
           </div>
+          <el-table class="flex-1" :data border>
+            <el-table-column label="排名" prop="rank" align="center" width="55" />
+            <el-table-column label="昵称">
+              <template #default="{ row }">
+                <div v-if="row.name">{{ row.name }}</div>
+                <div v-else class="italic text-#999">无数据</div>
+              </template>
+            </el-table-column>
+            <el-table-column label="UID" prop="uid" />
+            <el-table-column label="常用QQ" prop="qq" />
+            <el-table-column label="分数" prop="score" />
+            <el-table-column label="历史平均" prop="scoreAvg" />
+            <el-table-column label="标准参考" prop="standardDiff" />
+          </el-table>
+          <custom-pagination v-model:page="page" v-model:size="size" :total />
+        </template>
+        <div v-else class="size-full flex flex-col items-center justify-center">
+          <el-empty>
+            <el-button type="primary">导入数据</el-button>
+          </el-empty>
         </div>
       </div>
     </div>
@@ -28,9 +69,10 @@
 
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { getLastManyWeekends, getWeekendsOfMonth, monthOrderNumOfDay } from '@/utils/week.ts'
-import axios from 'axios'
+import { instance } from '@/utils/request'
+import CustomPagination from '@/components/custom-pagination.vue'
 
 const mouthList = getMouthList()
 const curMouth = ref<string>('last')
@@ -49,6 +91,8 @@ function getMouthList() {
 
 const weeks = ref<any[]>([])
 
+const battleTime = ref('')
+const status = ref('')
 onMounted(loadWeeks)
 watch(curMouth, loadWeeks)
 async function loadWeeks() {
@@ -67,39 +111,109 @@ async function loadWeeks() {
       const date1 = d.toISOString()
       const date2 = d.add(1, 'day').toISOString()
       const states = await checkImportStates([date1, date2])
-      const day1 = { date: fmt(date1), state: states[date1] }
-      const day2 = { date: fmt(date2), state: states[date2] }
+      const day1 = { date: fmt(date1), state: states[date1].state, text: states[date1].text }
+      const day2 = { date: fmt(date2), state: states[date2].state, text: states[date2].text }
       return { text, day1, day2 }
     }),
   )
+  battleTime.value = weeks.value[0]?.day1.date
+}
+
+const battleInfo = ref<any>()
+watch(battleTime, async (newTime) => {
+  if (newTime && status.value === 'imported') {
+    const resp = await instance.post('/battle/getBattleInfo', { date: newTime })
+    battleInfo.value = resp.data.data
+  }
+})
+
+function selectBattle(obj: any) {
+  battleTime.value = obj.date
+  status.value = obj.state
 }
 
 async function checkImportStates(days: string[]) {
-  const resp = await axios.post('/ninja_api/import/checkBattleImportStates', { days })
+  const resp = await instance.post('/import/checkBattleImportStates', { days })
   const states = resp.data.data
-  return Object.fromEntries(states.map((i) => [i.date, i.state]))
+  return Object.fromEntries(states.map((i: any) => [i.date, { ...i }]))
 }
+
+const fightTypeOptions = computed(() => {
+  if (!battleInfo.value) return []
+  return [
+    { label: `团本：${battleInfo.value.raidType1}`, value: 'raid1' },
+    { label: `团本：${battleInfo.value.raidType2}`, value: 'raid2' },
+    { label: '3v3', value: 'fight' },
+  ]
+})
+const fightType = ref('raid1')
+
+const page = ref(1)
+const size = ref(20)
+const total = ref(0)
+const data = ref<any[]>([])
+watch([battleTime, fightType, page, size], async () => {
+  if (battleTime.value && fightType.value && status.value === 'imported') {
+    const resp = await instance.post('/battle/getFightInfo', {
+      type: fightType.value,
+      time: battleTime.value,
+      page: page.value,
+      size: size.value,
+    })
+    console.log(resp)
+    const info = resp.data.data
+    data.value = info.list
+    total.value = info.pagination.total
+  }
+})
 </script>
 
 <style scoped lang="scss">
 .battle-view {
+  --gap: 10px;
+
+  --header-height: 32px;
+  --main-height: calc(100% - var(--header-height) - var(--gap));
+
+  --menu-width: 210px;
+  --main-width: calc(100% - var(--menu-width) - var(--gap));
+
   .battle-card {
-    width: 200px;
-    height: 100px;
+    width: 100%;
+    height: 36px;
+    padding: 0 20px;
     border: 1px solid #cecece;
     border-radius: 8px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     margin-right: 10px;
     cursor: pointer;
     transition: box-shadow 0.1s ease;
+
+    &.active {
+      background-color: var(--el-color-primary-light-9);
+      border-color: var(--el-color-primary);
+    }
 
     &:hover {
       transform: translateY(-1px);
       box-shadow: 4px 4px 6px -2px rgba(0, 0, 0, 0.1);
     }
+
+    .imported {
+      color: var(--el-color-success);
+    }
+
+    .no-data {
+      color: var(--el-color-danger);
+    }
+  }
+
+  .shadow-border {
+    border: 1px solid #cecece;
+    border-radius: 8px;
+    box-shadow: 3px 3px 5px -2px #cecece;
   }
 }
 </style>

@@ -13,8 +13,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import axios from 'axios'
 import { showToast } from 'vant'
+import { instance } from '@/utils/request'
 
 const visible = ref(false)
 const title = '导入数据'
@@ -22,7 +22,7 @@ const url = ref('')
 
 async function submit() {
   if (!url.value) return
-  const resp = await axios.post('/ninja_api/import/byUrl', { url: url.value })
+  const resp = await instance.post('/import/byUrl', { url: url.value })
   const info = resp.data
   console.log(info.message)
   const type = info.data.type

@@ -1,6 +1,8 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
+    "strict": true,
+    "strictPropertyInitialization": false,
     "target": "esnext",
     "module": "commonjs",
     "moduleResolution": "node",

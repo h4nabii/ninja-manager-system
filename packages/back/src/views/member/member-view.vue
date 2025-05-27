@@ -30,6 +30,7 @@ import { onMounted, reactive, ref, watch } from 'vue'
 import dayjs from 'dayjs'
 import axios from 'axios'
 import DialogMemberInfo from '@/views/member/components/dialog-member-info.vue'
+import { instance } from '@/utils/request'
 
 const data = ref<any[]>([])
 const page = ref(1)
@@ -37,7 +38,7 @@ const size = ref(10)
 const total = ref(0)
 
 async function loadData() {
-  const resp = await axios.post('/ninja_api/member/getMemberPage', reactive({ page, size }))
+  const resp = await instance.post('/member/getMemberPage', reactive({ page, size }))
   const info = resp.data.data
   data.value = info.list
   total.value = info.pagination.total
