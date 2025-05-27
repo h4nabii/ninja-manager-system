@@ -32,7 +32,6 @@ lerna-debug.log*
 **/public/rubbish/*
 **/public/export/*
 **/public/generated/*
-**/public/*
 **/logs/
 **/cache/
 **/config/data.ts
