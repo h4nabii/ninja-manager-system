@@ -1,5 +1,5 @@
 <template>
-  <van-dialog v-model:show="visible" @confirm="submit">
+  <van-dialog v-model:show="visible" show-cancel-button @confirm="submit">
     <template #title>
       <div class="mb-10px">{{ title }}</div>
     </template>
@@ -37,7 +37,44 @@ async function submit() {
   })
 }
 
+async function extractClipboardUrl() {
+  // 非 HTTPS 下不工作
+  if (!navigator.clipboard) return
+  try {
+    const text = await navigator.clipboard.readText()
+    if (text) {
+      url.value = text
+      showToast({
+        message: '已从剪贴板提取URL',
+        type: 'success',
+        duration: 1000,
+      })
+    } else {
+      showToast({
+        message: '剪贴板中没有URL',
+        type: 'fail',
+        duration: 1000,
+      })
+    }
+  } catch (err: any) {
+    if (err && (err.name === 'NotAllowedError' || err.message?.includes('denied'))) {
+      showToast({
+        message: '请在浏览器设置中授予剪贴板读取权限，或手动粘贴',
+        type: 'fail',
+        duration: 2500,
+      })
+    } else {
+      showToast({
+        message: '无法读取剪贴板',
+        type: 'fail',
+        duration: 1000,
+      })
+    }
+  }
+}
+
 function open() {
+  extractClipboardUrl()
   visible.value = true
 }
 

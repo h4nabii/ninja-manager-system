@@ -4,14 +4,14 @@
       <div class="text-24px fw-bold">「云上琉璃」</div>
     </header>
     <section class="h-[--main-height] p-10px">
-      <div>
-        <van-button type="primary" @click="openDialogImport">导入数据</van-button>
-        <dialog-import-by-url ref="dialogImport" />
+      <div class="h-full flex justify-center items-center">
+        <van-button type="primary" size="large" @click="openDialogImport">导入数据</van-button>
       </div>
     </section>
     <footer>
       <div></div>
     </footer>
+    <dialog-import-by-url ref="dialogImport" />
   </div>
 </template>
 
