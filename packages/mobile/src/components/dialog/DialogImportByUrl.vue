@@ -1,11 +1,17 @@
 <template>
-  <van-dialog v-model:show="visible" show-cancel-button @confirm="submit">
+  <van-dialog v-model:show="visible" show-cancel-button @confirm="submit" @cancel="close">
     <template #title>
       <div class="mb-10px">{{ title }}</div>
     </template>
     <div class="bg-#eee py-20px">
       <van-cell-group inset>
-        <van-field v-model="url" type="textarea" :rows="10" autosize />
+        <van-field
+          v-model="url"
+          type="textarea"
+          :rows="10"
+          autosize
+          placeholder="请填入忍之里小程序分享链接"
+        />
       </van-cell-group>
     </div>
   </van-dialog>
