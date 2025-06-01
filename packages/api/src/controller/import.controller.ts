@@ -1,11 +1,8 @@
 import { Body, Controller, Inject, Post } from '@midwayjs/core';
 import { InjectDataSource } from '@midwayjs/typeorm';
-import { DataSource, IsNull, Not } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { HttpResp } from '../utils/response';
-import { ImportService } from '../service/import.service';
-import { FamilyRaidEntity } from '../entity/family-raid.entity';
-import { FamilyFightEntity } from '../entity/family-fight.entity';
-import { FamilyBattleEntity } from '../entity/family-battle.entity';
+import { ImportService } from '../service/import/import.service';
 import * as dayjs from 'dayjs';
 
 @Controller('/import')

@@ -1,72 +1,27 @@
-import { Inject, makeHttpRequest, Provide } from '@midwayjs/core';
-import { UploadService } from './upload.service';
-import { InjectDataSource } from '@midwayjs/typeorm';
-import { DataSource, In, IsNull, Not } from 'typeorm';
-import { NinjaEntity } from '../entity/ninja.entity';
-import * as path from 'node:path';
-import * as fs from 'node:fs';
 import * as exceljs from 'exceljs';
 import * as dayjs from 'dayjs';
-import { MemberService } from './member.service';
-import { FamilyBattleEntity } from '../entity/family-battle.entity';
-import { FamilyRaidEntity } from '../entity/family-raid.entity';
-import { FamilyFightEntity } from '../entity/family-fight.entity';
-import { type } from 'node:os';
+import { Inject, Provide } from '@midwayjs/core';
+import { InjectDataSource } from '@midwayjs/typeorm';
+import { DataSource } from 'typeorm';
+import { ImportService } from './import.service';
+import { FamilyBattleEntity } from '../../entity/family-battle.entity';
+import { FamilyRaidEntity } from '../../entity/family-raid.entity';
+import { FamilyFightEntity } from '../../entity/family-fight.entity';
 
 @Provide()
-export class ImportService {
+export class ImportBattleService {
   @InjectDataSource()
   ds: DataSource;
 
   @Inject()
-  uploadService: UploadService;
+  importService: ImportService;
 
-  @Inject()
-  ninjaMemberService: MemberService;
-
-  async importByUrl(url: string) {
-    const info = await this.downloadFromUrl(url);
-    const { type, filePath } = info;
-    if (type === 'member') {
-      await this.dealMemberImport(filePath);
-    } else if (type === 'battle-report') {
-      await this.parseBattleReportExcel(filePath);
-    } else {
-      throw new Error('不支持的类型，请检查 URL 或联系管理');
-    }
-    return info.type;
+  async deelImport(filePath: string) {
+    await this.parseExcel(filePath);
   }
 
-  async dealMemberImport(filePath: string) {
-    const data = await this.parseMemberExcel(filePath);
-    const rawEntities = data.map(i => ({ ...i, inFamily: true }));
-    await this.ds.manager.update(NinjaEntity, { id: Not(IsNull()) }, { inFamily: false });
-    await this.ds.manager.upsert(NinjaEntity, rawEntities, ['uid']);
-  }
-
-  async parseMemberExcel(filePath: string) {
-    const wb = new exceljs.Workbook();
-    await wb.xlsx.readFile(filePath);
-    const ws = wb.getWorksheet(1);
-    if (!ws) throw new Error('未找到工作表，请检查文件格式');
-    // 排除标题行
-    const rows = ws.getRows(2, ws.rowCount - 1);
-    if (!rows) throw new Error('未找到数据行，请检查文件格式');
-    return rows.map(i => {
-      const uid = String(i.getCell(1).value);
-      const name = String(i.getCell(2).value);
-      const joinTime = dayjs(String(i.getCell(3).value)).toDate();
-      return { uid, name, joinTime };
-    });
-  }
-
-  async parseBattleReportExcel(filePath: string) {
-    const wb = new exceljs.Workbook();
-    await wb.xlsx.readFile(filePath);
-    const ws = wb.getWorksheet(1);
-    if (!ws) throw new Error('未找到工作表，请检查文件格式');
-    const rows = ws.getRows(1, ws.rowCount);
-    if (!rows) throw new Error('未找到数据行，请检查文件格式');
+  async parseExcel(filePath: string) {
+    const { ws, rows } = await this.importService.readFile(filePath);
 
     // 创建或更新族战对象
     const title = ws.getCell('A1');
@@ -170,20 +125,6 @@ export class ImportService {
     await this.ds.manager.upsert(FamilyFightEntity, fightInfos, ['battleId', 'type', 'order']);
   }
 
-  async downloadFromUrl(url: string) {
-    const resp = await makeHttpRequest(url);
-    if (!(resp.data instanceof Buffer)) throw new Error('response type is not buffer');
-    const urlInfo = new URL(url).pathname.split('/');
-    const [, , , type, hash, name] = urlInfo;
-    const basename = path.basename(decodeURI(name));
-    const extname = path.extname(decodeURI(name));
-    const fileName = `${basename}-${hash}${extname}`;
-    const saveDir = await this.uploadService.getSaveDir();
-    const filePath = `${saveDir}/${fileName}`;
-    fs.writeFileSync(filePath, new DataView(resp.data.buffer));
-    return { name, type, filePath };
-  }
-
   parseBattleTitle(title: string) {
     const info = title.split(' ');
     const [, , enemyName, , dateStr, result, scoreStr] = info;
@@ -204,17 +145,5 @@ export class ImportService {
     const [type, difficulty, scoreStr] = title.split(/[（）]/);
     const score = Number(scoreStr.split('：')[1]);
     return { type, difficulty, score };
-  }
-
-  async checkBattleImportStates(dates: Date[]) {
-    const battles = await this.ds.manager.find(FamilyBattleEntity, { where: { date: In(dates) } });
-    console.log(battles);
-    return dates.map(d => {
-      if (battles.find(i => i.date.getTime() === d.getTime())) {
-        return { date: d, state: 'imported', text: '已导入' };
-      } else {
-        return { date: d, state: 'no-data', text: '无数据' };
-      }
-    });
   }
 }
