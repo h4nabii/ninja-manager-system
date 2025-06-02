@@ -22,10 +22,12 @@ export class ImportMemberService {
 
   async parseExcel(filePath: string) {
     const { rows } = await this.importService.readFile(filePath);
-    return rows.map(i => {
+    // Assuming the first row is the header
+    return rows.slice(1).map(i => {
       const uid = String(i.getCell(1).value);
       const name = String(i.getCell(2).value);
       const joinTime = dayjs(String(i.getCell(3).value)).toDate();
+      console.log({ uid, name, joinTime });
       return { uid, name, joinTime };
     });
   }

@@ -24,6 +24,11 @@ const router = createRouter({
           name: 'info',
           component: () => import('../views/info/info-view.vue'),
         },
+        {
+          path: '/welfare',
+          name: 'welfare',
+          component: () => import('../views/welfare/welfare-view.vue'),
+        },
       ],
     },
   ],

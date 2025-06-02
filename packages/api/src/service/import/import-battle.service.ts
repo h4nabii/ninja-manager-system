@@ -101,6 +101,7 @@ export class ImportBattleService {
           // 如果是单人战斗
           const uid = String(line.getCell('G').value).split(/[（）]/)[1];
           const score = Number(line.getCell('L').value);
+          mvp = uid;
           ninjaInfo.push({ uid, score });
         } else {
           // 如果是多人战斗

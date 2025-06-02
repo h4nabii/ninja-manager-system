@@ -22,6 +22,7 @@ const menuList = [
   { name: 'member', text: '成员管理' },
   { name: 'battle', text: '族战管理' },
   { name: 'info', text: '家族概况' },
+  { name: 'welfare', text: '福利管理' },
 ]
 const curName = computed(() => route.name)
 

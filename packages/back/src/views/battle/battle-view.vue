@@ -92,7 +92,7 @@ import CustomPagination from '@/components/custom-pagination.vue'
 import dayjs from 'dayjs'
 import { computed, onMounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getLastManyWeekends, getWeekendsOfMonth, monthOrderNumOfDay } from '@/utils/week.ts'
+import { getLastManyBattleWeeks, BattleMonth, BattleWeek } from '@/utils/week.ts'
 import { instance } from '@/utils/request'
 import qrCode from 'qrcode'
 
@@ -119,19 +119,20 @@ onMounted(loadWeeks)
 watch(curMouth, loadWeeks)
 async function loadWeeks() {
   const fmt = (time: any) => dayjs(time).format('YYYY-MM-DD')
-  let weekends: Date[]
+  let weekends: BattleWeek[]
   if (curMouth.value === 'last') {
-    weekends = getLastManyWeekends(5)
+    weekends = getLastManyBattleWeeks(5)
   } else {
     const [yearStr, monthStr] = curMouth.value.split('-')
-    weekends = getWeekendsOfMonth(Number(yearStr), Number(monthStr))
+    const month = BattleMonth.fromYearMonth(Number(yearStr), Number(monthStr))
+    weekends = month.weeks
   }
   weeks.value = await Promise.all(
     weekends.map(async (weekend) => {
-      const d = dayjs(weekend).startOf('day')
-      const text = `${d.format('M月')}第${monthOrderNumOfDay(d)}周`
-      const date1 = d.toISOString()
-      const date2 = d.add(1, 'day').toISOString()
+      const d = weekend.saturday.date.startOf('day')
+      const text = `${d.format('M月')}第${weekend.orderNumInMonth}周`
+      const date1 = weekend.saturday.date.toISOString()
+      const date2 = weekend.sunday.date.toISOString()
       const states = await checkImportStates([date1, date2])
       const day1 = { date: fmt(date1), state: states[date1].state, text: states[date1].text }
       const day2 = { date: fmt(date2), state: states[date2].state, text: states[date2].text }
